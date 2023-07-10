@@ -4,7 +4,7 @@ var app = express();
 
 // This just sends back a message for any URL path not covered above
 app.use('/', (req, res) => {
-	res.send('Default message.');
+	res.send('Default message');
     });
 
 // This starts the web server on port 3000. 
