@@ -1,0 +1,9 @@
+<%- include('header'); %>ß
+    <div class="container-fluid" id="menu">
+        <form action="/receipts/process" method="POST" enctype="multipart/form-data">
+
+            <input type="file" name="file">
+            <button class="btn btn-outline-dark" type="submit">Add JSON File</button>
+        </form>
+    </div>
+    <%- include('footer'); %>
