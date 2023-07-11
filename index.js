@@ -33,6 +33,7 @@ app.post('/receipts/process', (req, res) => {
                 console.log(`Receipt ${id} already being track.`);
             } else {
                 receipts.set(id, receipt);
+                //res.json({"id" : id});
             }
         } else {
             console.log("Not valid JSON file");
@@ -47,6 +48,7 @@ app.post('/receipts/process', (req, res) => {
                 console.log(`Receipt ${id} already being track.`);
             } else {
                 receipts.set(id, receipt);
+                //res.json({"id" : id});
             }
         } else {
             console.log(text);
@@ -63,6 +65,15 @@ app.post('/receipts/process', (req, res) => {
 app.get('/receipts/:id/points', (req, res) => {
     console.log(receipts.get(req.params.id));
     res.send(receipts.get(req.params.id));
+
+    var receipt = receipts.get(req.params.id);
+
+    var retailer = receipt['retailer'];
+    var total = receipt['total'];
+    var items = receipt['items'];
+    var purchaseDate = receipt['purchaseDate'];
+    var purchaseTime = receipt['purchaseTime'];
+
 
 });
 
