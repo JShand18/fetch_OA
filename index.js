@@ -15,19 +15,32 @@ app.get("/", function (req, res) {
     res.render('launch');
 })
 
+function validateJSONFile(file) {
+    try {
+        JSON.parse(file.data);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
 app.post('/receipts/process', (req, res) => {
     //Checking to see if form action was a file upload
     if (req.files) {
         // retriving file from the request body
         var file = req.files.file;
-        var receipt = JSON.parse(file.data);
-        var id = file.md5;
-
-        // checking to see if the receipt already exists
-        if (receipts.has(id)) {
-            console.log(`Receipt ${id} already being track.`);
-        } else {
-            receipts.set(id, receipt);
+        // validate that file is a JSON file
+        if (validateJSONFile(file)) {
+            var receipt = JSON.parse(file.data);
+            var id = file.md5;
+            // checking to see if the receipt already exists
+            if (receipts.has(id)) {
+                console.log(`Receipt ${id} already being track.`);
+            } else {
+                receipts.set(id, receipt);
+            }
+        } else{
+            console.log("Not valid JSON file");
         }
     }
     else {
