@@ -133,3 +133,17 @@ describe("Test the receipts/process total validation", () => {
             });
     });
 });
+
+describe("Test the receipts/:id/points invalid id", () => {
+    test("It should send a 500 error code and id error message", async () => {
+        const res = await request(app)
+            .post("/receipts/process")
+            .send(examples.morningReceipt);
+        return request(app)
+            .get(`/receipts/notacapturedid2023/points`)
+            .then(response => {
+                expect(response.statusCode).toBe(500);
+                expect(response.body.error).toBe("Receipt id not currently being tracked");
+            });
+    });
+});
