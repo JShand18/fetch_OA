@@ -34,4 +34,7 @@ An API web service that accepts HTTP requests and returns responses outlined in 
     ```
     Listening on port: http://localhost:3000
     ```
-6) Verify the app is running by visiting http://localhost:3000. You should see the message: "Welcome to Receipt Processor"
+6) Verify the app is running by visiting http://localhost:3000. You should see the message: 
+    ```
+    Welcome to Receipt Processor
+    ```
