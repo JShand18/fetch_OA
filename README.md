@@ -120,7 +120,7 @@ Example Response:
 * Enter `localhost:3000/receipts/{id}/points` with the `id` filled from the `/receipts/process` endpoint.
   >![Postman 2](/assets/GET_URL.png)
 * Click `Send` and you should receive a `Status: 200 OK` response in the body section below.
-  >![Postman 4](/assets/GET_Points.png)
+  >![Postman 4](/assets/GET_FullResponse.png)
 
 
 
