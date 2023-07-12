@@ -7,3 +7,31 @@ An API web service that accepts HTTP requests and returns responses outlined in 
 * [Jest](https://jestjs.io/) – A framework for testing JavaScript code. Unit testing is the main usage of it
 * [Supertest](https://www.npmjs.com/package/supertest) – Allows testing endpoints and routes on HTTP servers
 * [Cross-Env](https://www.npmjs.com/package/cross-env) – Package for setting environmental variables inline within a command
+
+## Getting Started
+1) You must have [Node](https://nodejs.org/) version v10.0.0 or higher installed.  
+  Verify Node version
+    ```
+    node --version
+    ```
+2) Clone repo locally
+    ```
+    git clone https://https://github.com/JShand18/fetch_OA.git
+    ```
+3) Go to the project's root directory
+    ```
+    cd /my/path/to/fetch_OA
+    ```
+4) Install dependencies
+    ```
+    npm install
+    ```
+5) Start the server
+    ```
+    npm start
+    ```
+    Your terminal should read:
+    ```
+    Listening on port: http://localhost:3000
+    ```
+6) Verify the app is running by visiting http://localhost:3000. You should see the message: "Welcome to Receipt Processor"
