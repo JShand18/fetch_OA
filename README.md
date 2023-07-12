@@ -16,7 +16,7 @@ An API web service that accepts HTTP requests and returns responses outlined in 
     ```
 2) Clone repo locally
     ```
-    git clone https://https://github.com/JShand18/fetch_OA.git
+    git clone https://github.com/JShand18/fetch_OA.git
     ```
 3) Go to the project's root directory
     ```
