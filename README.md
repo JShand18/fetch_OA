@@ -38,16 +38,15 @@ An API web service that accepts HTTP requests and returns responses outlined in 
     ```
     Welcome to Receipt Processor
     ```
-## API calls
+# API calls
 We will be using **Postman** to make calls to the API.  
 * Go to the [Postman](https://www.postman.com/) site.
 * Create an account or log in.
 * From your acount's home screen, create or use an existing `Workspace` by clicking on `Workspace` in the top left menu bar.
-* Once you're in a workspace, click on `Create a request` on the right under `Getting started`.
-* Your interface should look like the image below.
->![Postman 1]()
+* Once you're in a workspace, click on `Create a request` on the right under `Getting started`:
+>![Postman 1](/assets/Postman.png)
 
-# Endpoint: Process Receipts
+## Endpoint: Process Receipts
 
 * Path: `/receipts/process`
 * Method: `POST`
@@ -90,6 +89,19 @@ Example Response:
 { "id": "b77ba577402049e95e310a040ab5728a" }
 ```
 
+### Usage
+* Click the dropdown that says `GET` and select `POST`.
+* Enter `localhost:3000/receipts/process` to access endpoint.
+  >![Postman 2](/assets/POST_URL.png)
+* Under the URL, select `Body`, check the `raw` radio button, and select `JSON` from the dropdown.
+* Enter a valid request body in the section below, which you can copy and paste from [morning-receipt.json](examples/morning-receipt.json).
+  >![Postman 2](/assets/POST_PayloadJSON.png)
+* Click `Send` and you should receive a `Status: 200 OK` response in the body section below.
+  >![Postman 4](/assets/POST_FullResponse.png)
+* Copy and paste the `id` from the response to be used for the `/receipts/{id}/points` endpoint
+  >![Postman 4](/assets/POST_ResponseId.png)
+
+
 # Endpoint: Get Points
 
 * Path: `/receipts/{id}/points`
@@ -102,6 +114,14 @@ Example Response:
 ```json
 { "points": 15 }
 ```
+
+### Usage
+* Click the dropdownselect `POST`.
+* Enter `localhost:3000/receipts/{id}/points` with the `id` filled from the `/receipts/process` endpoint.
+  >![Postman 2](/assets/GET_URL.png)
+* Click `Send` and you should receive a `Status: 200 OK` response in the body section below.
+  >![Postman 4](/assets/GET_Points.png)
+
 
 
 ## Running Tests
