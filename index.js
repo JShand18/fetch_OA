@@ -27,33 +27,41 @@ var pointsStore = new Map(); // Key: id, Value: awarded points
 
 app.post('/receipts/process', (req, res) => {
     var data = req.body;
-    // if (validateJSON(data)) {
-    var receipt = data;
-    // creating ID based on md5 hashing
-    // duplicate receipts will have the same IDs
-    var id = crypto.createHash('md5').update(JSON.stringify(receipt)).digest('hex');
-    // checking to see if the receipt already exists
-    if (!receiptStore.has(id)) {
-        receiptStore.set(id, receipt);
+    var message = validateJSON(data);
+    if (message == 200) {
+        var receipt = data;
+        // creating ID based on md5 hashing
+        // duplicate receipts will have the same IDs
+        var id = crypto.createHash('md5').update(JSON.stringify(receipt)).digest('hex');
+        // checking to see if the receipt already exists
+        if (!receiptStore.has(id)) {
+            receiptStore.set(id, receipt);
+        }
+        res.json({ "id": id });
+    } else {
+        res.status(406).json({ "error": "Data provided does not meet criteria", "message": message });
     }
-    res.json({ "id": id });
 });
 
 // receipts/id/points endpoint
 app.get('/receipts/:id/points', (req, res) => {
     var id = req.params.id;
-    var receipt = receiptStore.get(id);
-    // check to see if the receipt's points have already been calculated and stored
-    if (pointsStore.has(id)) {
-        res.json({ "points": pointsStore.get(id) });
+    if (receiptStore.has(id)) {
+        var receipt = receiptStore.get(id);
+        // check to see if the receipt's points have already been calculated and stored
+        if (pointsStore.has(id)) {
+            res.json({ "points": pointsStore.get(id) });
+        } else {
+            // calculates and saves receipts points
+            var points = calculateTotalSumPoints(receipt);
+            pointsStore.set(id, points);
+            res.json({ "points": points });
+        }
     } else {
-        // calculates and saves receipts points
-        var points = calculateTotalSumPoints(receipt);
-        pointsStore.set(id, points);
-        res.json({ "points": points });
+        res.status(500).json({ "error": "Receipt id not currently being tracked" })
     }
-});
 
+});
 
 //******* CALCULATION HELPER FUNCTIONS */
 
@@ -157,17 +165,55 @@ function calculatePurchaseTimePoints(time) {
 
 /** validateJSON
  *      @params data – file or text content
- *      @returns boolean 
+ *      @returns message – 200 success code, or error message
  *      Determines if given file or text data is JSON formatted
  */
-// function validateJSON(data) {
-//     try {
-//         JSON.parse(data);
-//         return true;
-//     } catch (err) {
-//         return false;
-//     }
-// }
+function validateJSON(data) {
+    // RegEx for proper formatting
+    var dateRegEx = /(\d{4})(\/|-)(\d{1,2})(\/|-)(\d{1,2})/
+    var priceRegEx = /(\d{1, 3}(\, \d{3})*|(\d+))(\.\d{2})/
+    var timeRegEx = /([01]?[0-9]|2[0-3]):[0-5][0-9]/
+
+    // Checking retailer name
+    if (!data['retailer']) {
+        return "Unable to locate retailer field"
+    }
+    else if (typeof data['retailer'] != "string") {
+        return "Retailer field needs to be of type 'string'"
+    }
+
+    // Checking total is formatted for currency
+    else if (!data['total']) {
+        return "Unable to locate total field"
+    }
+    else if (!priceRegEx.test(data['total'])) {
+        return "Total not properly formatted"
+    }
+
+    //Checking that items exist
+    else if (!data['items']) {
+        return "Unable to locate items object"
+    }
+
+    // Checking that the date is formatted YYYY-MM-DD
+    else if (!data['purchaseDate']) {
+        return "Unable to locate purchaseDate field"
+    }
+    else if (!dateRegEx.test(data['purchaseDate'])) {
+        return "PurchaseDate not properly formatted: YYYY-MM-DD required"
+    }
+
+    //Checking that the time is formatted HH:MM
+    else if (!data['purchaseTime']) {
+        return "Unable to locate purchaseTime field"
+    }
+    else if (!timeRegEx.test(data['purchaseTime'])) {
+        return "PurchaseTime not properly formatted: HH:MM required"
+    }
+
+    // If valididated return success code
+    else { return 200; }
+}
 
 app.use('/', (req, res) => {
     res.send("Receipt Processor");
