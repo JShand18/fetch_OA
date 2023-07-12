@@ -19,7 +19,8 @@
 
         <div class="list-group">
             <% receipts.forEach((receipt, id)=> { %>
-                <a href=<%=`/receipts/${id}/points`%> class="list-group-item list-group-item-action"><%=`{"id" : "${id}"}` %></a>
+                    <a href=<%=`/receipts/${id}/points`%> class="list-group-item list-group-item-action" role="button">
+                        <%=`{"id" : "${id}" }` %></a>
                 <% }) %>
         </div>
     </div>
