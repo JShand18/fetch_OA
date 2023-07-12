@@ -38,3 +38,16 @@ An API web service that accepts HTTP requests and returns responses outlined in 
     ```
     Welcome to Receipt Processor
     ```
+
+## Running Tests
+Run tests in [test.js](tests/test.js) from the project's main directory:
+```
+npm test
+```
+Tests check that the app should:
+* `POST` add new receipt
+* `GET` points from receipt
+* NOT `GET` invalid ID
+* NOT `POST` invalid purchaseDate
+* NOT `POST` invalid purchaseTime
+* NOT `POST` invalid total amount
