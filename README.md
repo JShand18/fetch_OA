@@ -130,4 +130,7 @@ Tests check that the app should:
 * NOT `POST` invalid purchaseTime
 * NOT `POST` invalid total amount
 
+## Credits
+Referenced @scottgall's [README](https://github.com/scottgall/fetch-rewards-backend-takehome/blob/main/README.md) for formatting only.
+
 
