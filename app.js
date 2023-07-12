@@ -22,27 +22,33 @@ var receiptStore = new Map(); // Key: id, Value: Receipt JSON
 var pointsStore = new Map(); // Key: id, Value: awarded points
 
 
-//******* ENDPOINT ROUTING */
+//******* ROUTING */
 
+// POST route to added JSON formatted receipts
 app.post('/receipts/process', (req, res) => {
-    var data = req.body;
-    var message = validateJSON(data);
-    if (message == 200) {
-        var receipt = data;
-        // creating ID based on md5 hashing
-        // duplicate receipts will have the same IDs
-        var id = crypto.createHash('md5').update(JSON.stringify(receipt)).digest('hex');
-        // checking to see if the receipt already exists
-        if (!receiptStore.has(id)) {
-            receiptStore.set(id, receipt);
+    if (req.body) {
+        var data = req.body;
+        var message = validateJSON(data);
+        if (message == 200) {
+            var receipt = data;
+            // creating ID based on md5 hashing
+            // duplicate receipts will have the same IDs
+            var id = crypto.createHash('md5').update(JSON.stringify(receipt)).digest('hex');
+            // checking to see if the receipt already exists
+            if (!receiptStore.has(id)) {
+                receiptStore.set(id, receipt);
+            }
+            res.json({ "id": id });
+        } else {
+            res.status(406).json({ "error": "Data provided does not meet criteria", "message": message });
         }
-        res.json({ "id": id });
     } else {
-        res.status(406).json({ "error": "Data provided does not meet criteria", "message": message });
+        res.status(406).json({ "error": "Bad request body", "message": "No data found in request body"});
     }
+
 });
 
-// receipts/id/points endpoint
+// GET route to calculate points from generated id
 app.get('/receipts/:id/points', (req, res) => {
     var id = req.params.id;
     if (receiptStore.has(id)) {
@@ -62,19 +68,19 @@ app.get('/receipts/:id/points', (req, res) => {
 
 });
 
-//******* CALCULATION HELPER FUNCTIONS */
+//******* POINT CALCULATION HELPER FUNCTIONS */
 
-/** calculateTotalSumPoints
+/** Calculates points of a receipt based on set rules:
+ *      One point for every alphanumeric character in the retailer name.
+ *      50 points if the total is a round dollar amount with no cents.
+ *      25 points if the total is a multiple of 0.25.
+ *      5 points for every two items on the receipt.
+ *      If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
+ *      6 points if the day in the purchase date is odd.
+ *      10 points if the time of purchase is after 2:00pm and before 4:00pm. 
  *      @params receipt - JSON formatted receipt
  *      @returns totalPoints – int, total amount of points
- *      Calculates points of a receipt based on set rules:
- *          One point for every alphanumeric character in the retailer name.
- *          50 points if the total is a round dollar amount with no cents.
- *          25 points if the total is a multiple of 0.25.
- *          5 points for every two items on the receipt.
- *          If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
- *          6 points if the day in the purchase date is odd.
- *          10 points if the time of purchase is after 2:00pm and before 4:00pm. 
+ 
  */
 function calculateTotalSumPoints(receipt) {
 
@@ -88,25 +94,25 @@ function calculateTotalSumPoints(receipt) {
     return totalPoints;
 }
 
-/** calculateRetailerPoints
+/** Calculates one point for every alphanumeric character in the retailer name.
  *      @params retailer – string, name of retailer store
  *      @returns points – int, amount of points
- *      Calculates one point for every alphanumeric character in the retailer name.
+ *      
  */
 function calculateRetailerPoints(retailer) {
     var regex = /[a-zA-Z0-9]/g;
     return retailer.match(regex).length;
 }
 
-/** calculateTotalDollarPoints
+/** Calculates 50 points if the total is a round dollar amount with no cents.
+ *  Calculates 25 points if the total is a multiple of 0.25.
  *      @params total – string, total amount of item prices
  *      @returns points – int, amount of points
- *      Calculates 50 points if the total is a round dollar amount with no cents.
- *      Calculates 25 points if the total is a multiple of 0.25.
+ *      
  */
 function calculateTotalDollarPoints(total) {
     var points = 0;
-    var amount = parseFloat(total);
+    var amount = parseFloat(total.trim());
     if (amount % 1.00 == 0) {
         points += 50;
     }
@@ -116,12 +122,12 @@ function calculateTotalDollarPoints(total) {
     return points;
 }
 
-/** calculatePurchaseDatePoints
+/** Calculates 5 points for every two items on the receipt.
+ *  If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
+ *  6 points if the day in the purchase date is odd.
  *      @params items – object, list of item objects with description and price of item
  *      @returns points – int, amount of points
- *      Calculates 5 points for every two items on the receipt.
- *      If the trimmed length of the item description is a multiple of 3, multiply the price by 0.2 and round up to the nearest integer. The result is the number of points earned.
- *          6 points if the day in the purchase date is odd.
+ *      
  */
 function calculateItemsPoints(items) {
     var points = 0;
@@ -129,32 +135,30 @@ function calculateItemsPoints(items) {
     points += Math.floor(items.length / 2) * 5;
 
     items.forEach(item => {
-        if (item['shortDescription'].length % 3 == 0) {
-            points += Math.ceil(parseFloat(item['price']) * 0.2);
+        if (item['shortDescription'].trim().length % 3 == 0) {
+            points += Math.ceil(parseFloat(item['price'].trim()) * 0.2);
         }
     })
 
     return points;
 }
 
-/** calculatePurchaseDatePoints
+/** Calculates 6 points if the day in the purchase date is odd.
  *      @params date – string, date of purchase
  *      @returns points – int, amount of points
- *      Calculates 6 points if the day in the purchase date is odd.
  */
 function calculatePurchaseDatePoints(date) {
-    if (parseInt(date.substr(-1)) % 2 == 1) {
+    if (parseInt(date.trim().substr(-1)) % 2 == 1) {
         return 6;
     } else { return 0; }
 }
 
-/** calculatePurchaseTimePoints
+/** Calculates 10 points if the time of purchase is after 2:00pm and before 4:00pm.
  *      @params time – string, time of purchase
- *      @returns points – int, amount of points
- *      Calculates 10 points if the time of purchase is after 2:00pm and before 4:00pm. 
+ *      @returns points – int, amount of points    
  */
 function calculatePurchaseTimePoints(time) {
-    var hour = parseInt(time.split(":")[0]);
+    var hour = parseInt(time.trim().split(":")[0]);
     if (hour >= 14 && hour <= 16) {
         return 10;
     } else { return 0; }
@@ -162,19 +166,22 @@ function calculatePurchaseTimePoints(time) {
 
 //******* VALIDATION HELPER FUNCTIONS */
 
-/** validateJSON
+/** Determines if given file or text data is JSON formatted
  *      @params data – file or text content
- *      @returns message – 200 success code, or error message
- *      Determines if given file or text data is JSON formatted
+ *      @returns message – 200 success code, or error message 
  */
 function validateJSON(data) {
     // RegEx for proper formatting
     var dateRegEx = /(\d{4})(\/|-)(\d{1,2})(\/|-)(\d{1,2})/
     var priceRegEx = /(\d{1, 3}(\, \d{3})*|(\d+))(\.\d{2})/
-    var timeRegEx = /([01]?[0-9]|2[0-3]):[0-5][0-9]/
+    var timeRegEx = /([01][0-9]|2[0-3]):[0-5][0-9]/
+
+    if (data == "" || !data){
+        return "No data found in request body";
+    }
 
     // Checking retailer name
-    if (!data['retailer']) {
+    else if (!data['retailer']) {
         return "Unable to locate retailer field"
     }
     else if (typeof data['retailer'] != "string") {
@@ -215,10 +222,9 @@ function validateJSON(data) {
 }
 
 
+// Default landing route
 app.use('/', (req, res) => {
     res.send("Welcome to Receipt Processor");
 });
 
 module.exports = app;
-
-
