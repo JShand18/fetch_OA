@@ -9,7 +9,7 @@ An API web service that accepts HTTP requests and returns responses outlined in 
 * [Cross-Env](https://www.npmjs.com/package/cross-env) – Package for setting environmental variables inline within a command
 
 ## Getting Started
-1) You must have [Node](https://nodejs.org/) version v10.0.0 or higher installed.  
+1) You must have [Node](https://nodejs.org/) version installed.  
   Verify Node version
     ```
     node --version
